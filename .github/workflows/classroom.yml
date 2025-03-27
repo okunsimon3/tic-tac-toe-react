@@ -1,0 +1,70 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Layout
+      id: layout
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Layout
+        setup-command: npm install
+        command: npm run test:layout
+        timeout: 10
+        max-score: 3
+    - name: Styling
+      id: styling
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Styling
+        setup-command: npm install
+        command: npm run test:styling
+        timeout: 10
+        max-score: 2
+    - name: Logic
+      id: logic
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Logic
+        setup-command: npm install
+        command: npm run test:logic
+        timeout: 10
+        max-score: 1
+    - name: Controller
+      id: controller
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Controller
+        setup-command: npm install
+        command: npm run test:controller
+        timeout: 10
+        max-score: 6
+    - name: Reset
+      id: reset
+      uses: classroom-resources/autograding-command-grader@v1
+      with:
+        test-name: Reset
+        setup-command: npm install
+        command: npm test
+        timeout: 10
+        max-score: 5
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        LAYOUT_RESULTS: "${{steps.layout.outputs.result}}"
+        STYLING_RESULTS: "${{steps.styling.outputs.result}}"
+        LOGIC_RESULTS: "${{steps.logic.outputs.result}}"
+        CONTROLLER_RESULTS: "${{steps.controller.outputs.result}}"
+        RESET_RESULTS: "${{steps.reset.outputs.result}}"
+      with:
+        runners: layout,styling,logic,controller,reset
